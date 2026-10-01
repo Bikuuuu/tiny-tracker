@@ -1,0 +1,90 @@
+name: Installer
+# Builds Setup.exe and runs the install test on a fresh runner (spec §11, §12). CI and Release both call it.
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: The version to stamp in; empty for Directory.Build.props's
+        type: string
+        default: ''
+permissions:
+  contents: read
+jobs:
+  installer:
+    runs-on: windows-2025
+    timeout-minutes: 45
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      # The runner has 6.x; 7.1 comes from its GitHub release, checked before it runs.
+      - name: Install Inno Setup 7.1
+        shell: pwsh
+        run: |
+          $setup = Join-Path $env:RUNNER_TEMP 'innosetup-7.1.0-x64.exe'
+          Invoke-WebRequest -Uri 'https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-7.1.0-x64.exe' -OutFile $setup
+          $hash = (Get-FileHash -LiteralPath $setup -Algorithm SHA256).Hash
+          if ($hash -ne '0362A383ED217D4C4239B5933866DD96D3EB2102737DA92F80F6057A4B40DF2F') { throw "Inno Setup's SHA-256 doesn't match: $hash" }
+          $run = Start-Process -FilePath $setup -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/ALLUSERS' -Wait -PassThru
+          if ($run.ExitCode -ne 0) { throw "Inno Setup's installer exited with $($run.ExitCode)" }
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          if ($env:VERSION) { ./scripts/build-installer.ps1 -Version $env:VERSION } else { ./scripts/build-installer.ps1 }
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup
+          path: dist/TinyTracker-Setup-*-x64.exe
+          if-no-files-found: error
+          retention-days: 7
+          # A rerun of a failed job uploads again into the same run.
+          overwrite: true
+      # This code with a lower version, which updates itself to this build in the install test.
+      - name: Build a lower version
+        shell: pwsh
+        run: ./scripts/build-installer.ps1 -Version 0.0.1 -Dist (Join-Path $env:RUNNER_TEMP 'lower')
+      # GitHub's latest release, which updates itself to this build too; none before the first.
+      - name: Download the previous release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = gh release list --repo $env:GITHUB_REPOSITORY --exclude-drafts --exclude-pre-releases --json tagName,isLatest --jq '.[] | select(.isLatest) | .tagName'
+          if ($LASTEXITCODE -ne 0) { throw "The releases couldn't be read." }
+          if (-not $tag) { 'There is no release yet.'; exit 0 }
+          gh release download $tag --repo $env:GITHUB_REPOSITORY --pattern 'TinyTracker-Setup-*-x64.exe' --dir (Join-Path $env:RUNNER_TEMP 'previous')
+          if ($LASTEXITCODE -ne 0) { throw "$tag's Setup couldn't be downloaded." }
+      - name: Update winget
+        shell: pwsh
+        # Authenticated, so the runner's shared API limit can't fail it.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Install-Module Microsoft.WinGet.Client -RequiredVersion 1.29.380 -Force -Scope CurrentUser -Repository PSGallery
+          Repair-WinGetPackageManager -Version 1.29.380 -Force
+          winget --version
+      - name: Install old test packages
+        shell: pwsh
+        run: |
+          ./scripts/install-old-package.ps1 -Id 'Notepad++.Notepad++' -Version '8.9.7'
+          ./scripts/install-old-package.ps1 -Id 'VideoLAN.VLC' -Version '3.0.20'
+      - name: Install test
+        shell: pwsh
+        # A step that runs out of time fails, so its logs still come back.
+        timeout-minutes: 30
+        run: |
+          $setup = Get-ChildItem -Path dist -Filter 'TinyTracker-Setup-*-x64.exe' | Select-Object -First 1
+          $version = $setup.Name -replace '^TinyTracker-Setup-(.+)-x64\.exe$', '$1'
+          $previous = @(Get-ChildItem -Path (Join-Path $env:RUNNER_TEMP 'previous') -Filter 'TinyTracker-Setup-*-x64.exe' -ErrorAction SilentlyContinue)
+          $more = if ($previous) { @{ Previous = $previous[0].FullName } } else { @{} }
+          ./scripts/test-install.ps1 -Setup $setup.FullName -Version $version -Lower (Join-Path $env:RUNNER_TEMP 'lower\TinyTracker-Setup-0.0.1-x64.exe') @more
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ failure() || cancelled() }}
+        with:
+          name: install-test-logs
+          path: ${{ runner.temp }}/install-test
+          retention-days: 7
+          overwrite: true

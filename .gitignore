@@ -1,0 +1,21 @@
+# IDE and editor settings
+.idea/
+.vs/
+.vscode/
+*.user
+*.suo
+
+# .NET build output
+bin/
+obj/
+[Pp]ublish/
+artifacts/
+TestResults/
+*.binlog
+
+# Installer and release output
+dist/
+
+# Windows clutter
+Thumbs.db
+desktop.ini

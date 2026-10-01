@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <RootNamespace>TinyTracker.Helper</RootNamespace>
+    <AssemblyName>TinyTracker.Helper</AssemblyName>
+    <!-- The UAC prompt and Task Manager show this name. -->
+    <AssemblyTitle>Tiny Tracker Helper</AssemblyTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\icon\generated\app.ico</ApplicationIcon>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TinyTracker.Core\TinyTracker.Core.csproj" />
+    <ProjectReference Include="..\TinyTracker.WinGet\TinyTracker.WinGet.csproj" />
+  </ItemGroup>
+</Project>

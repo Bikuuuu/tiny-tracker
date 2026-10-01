@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256">
+  <defs>
+    <path id="hoodPath" d="M128 18 C190 18 238 64 240 128 C242 186 214 230 172 244 L84 244 C42 230 14 186 16 128 C18 64 66 18 128 18 Z"/>
+    <path id="heart" d="M0 28.9 C-6.8 23.8 -34 8.5 -34 -10.2 C-34 -25.5 -15.3 -32.3 0 -17 C15.3 -32.3 34 -25.5 34 -10.2 C34 8.5 6.8 23.8 0 28.9 Z"/>
+  </defs>
+  <g stroke="#A8466F" stroke-width="10">
+    <ellipse cx="62" cy="36" rx="30" ry="34" fill="#EFA257" transform="rotate(-18 62 36)"/>
+    <ellipse cx="194" cy="36" rx="30" ry="34" fill="#EFA257" transform="rotate(18 194 36)"/>
+    <use xlink:href="#hoodPath" fill="#EE8DB5"/>
+  </g>
+  <ellipse cx="128" cy="146" rx="82" ry="78" fill="#F4A858"/>
+  <use xlink:href="#heart" fill="#2A1A14" transform="translate(84 140)"/>
+  <use xlink:href="#heart" fill="#2A1A14" transform="translate(172 140)"/>
+  <ellipse cx="128" cy="192" rx="13" ry="9" fill="#D8607E"/>
+</svg>

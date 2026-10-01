@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- The self-contained helper is only built for these tests, never copied here. -->
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TinyTracker.WinGet\TinyTracker.WinGet.csproj" />
+    <!-- Built first, so the tests can start the real helper from its own folder. -->
+    <ProjectReference Include="..\..\src\TinyTracker.Helper\TinyTracker.Helper.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TinyTracker.DummyApp\TinyTracker.DummyApp.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TinyTracker.FakeWinGet\TinyTracker.FakeWinGet.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>HelperPath</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)..\..\src\TinyTracker.Helper\$(OutputPath)TinyTracker.Helper.exe</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>DummyAppFolder</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)..\TinyTracker.DummyApp\$(OutputPath)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>FakeWinGetFolder</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)..\TinyTracker.FakeWinGet\$(OutputPath)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+</Project>

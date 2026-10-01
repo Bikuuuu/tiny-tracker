@@ -1,0 +1,16 @@
+name: Idea or bigger change
+description: Something Tiny Tracker could do, or a change to talk over before a pull request.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What you'd like, and the problem it solves.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do now
+      description: Optional. How you get by today, or other ways it could work.

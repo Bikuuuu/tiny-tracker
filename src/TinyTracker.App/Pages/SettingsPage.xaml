@@ -1,0 +1,180 @@
+<pages:FlyoutPage
+    x:Class="TinyTracker.App.Pages.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:app="using:TinyTracker.App"
+    xmlns:controls="using:TinyTracker.App.Controls"
+    xmlns:pages="using:TinyTracker.App.Pages"
+    xmlns:p="using:TinyTracker.Presentation"
+    NavigationCacheMode="Required">
+    <pages:FlyoutPage.Resources>
+        <DataTemplate x:Key="NoticeBar" x:DataType="p:Notice">
+            <controls:NoticeBar Closed="OnNoticeClosed" />
+        </DataTemplate>
+    </pages:FlyoutPage.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel x:Name="Top" Padding="16,12,16,8" Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button Style="{StaticResource IconButton}" Click="OnBack" ToolTipService.ToolTip="{x:Bind p:Strings.Back}" ToolTipService.Placement="Bottom" AutomationProperties.Name="{x:Bind p:Strings.Back}">
+                    <FontIcon Glyph="&#xE72B;" FontSize="14" />
+                </Button>
+                <TextBlock Text="{x:Bind p:Strings.Settings}" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+            </StackPanel>
+            <ItemsControl ItemsSource="{x:Bind Settings.Notices}" ItemTemplate="{StaticResource NoticeBar}" IsTabStop="False" />
+        </StackPanel>
+
+        <ScrollViewer x:Name="Scroller" Grid.Row="1">
+            <StackPanel x:Name="Body" Padding="16,0,16,12" Spacing="4">
+                <TextBlock Text="{x:Bind p:Strings.AppsSection}" Style="{StaticResource SectionTitle}" Margin="0,4,0,2" />
+                <Button x:Name="ChooseAppsButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="14,10" Click="OnChooseApps"
+                        AutomationProperties.Name="{x:Bind Settings.ChooseAppsName, Mode=OneWay}">
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind p:Strings.ChooseApps}" />
+                            <TextBlock Text="{x:Bind Settings.TrackedText, Mode=OneWay}" Style="{StaticResource Secondary}" />
+                        </StackPanel>
+                        <FontIcon HorizontalAlignment="Right" VerticalAlignment="Center" Glyph="&#xE76C;" FontSize="12" />
+                    </Grid>
+                </Button>
+                <!-- Back up and Restore, under their text: the flyout is narrow. -->
+                <Border Style="{StaticResource Card}" Padding="14,10">
+                    <StackPanel Spacing="8">
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind p:Strings.AppList}" TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Bind Settings.AppListText, Mode=OneWay}" Style="{StaticResource Secondary}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="{x:Bind p:Strings.BackUp}" Command="{x:Bind Settings.BackUpCommand}" AutomationProperties.Name="{x:Bind p:Strings.BackUpName}" />
+                            <Button x:Name="RestoreButton" Content="{x:Bind p:Strings.Restore}" Command="{x:Bind Settings.RestoreCommand}" AutomationProperties.Name="{x:Bind p:Strings.RestoreName}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{x:Bind p:Strings.CheckingSection}" Style="{StaticResource SectionTitle}" />
+                <controls:SettingCard Header="{x:Bind p:Strings.CheckEvery}">
+                    <ComboBox ItemsSource="{x:Bind Settings.IntervalChoices}" SelectedIndex="{x:Bind Settings.IntervalIndex, Mode=TwoWay}" MinWidth="110" />
+                </controls:SettingCard>
+
+                <TextBlock Text="{x:Bind p:Strings.InstallingSection}" Style="{StaticResource SectionTitle}" />
+                <controls:SettingCard Header="{x:Bind p:Strings.AutoUpdateApps}" Description="{x:Bind p:Strings.AutoUpdateAppsHelp}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.AutoUpdateApps, Mode=TwoWay}" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind p:Strings.SilentMode}" Description="{x:Bind Settings.SilentModeDescription, Mode=OneWay}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.SilentMode, Mode=TwoWay}" IsEnabled="{x:Bind Settings.CanChangeSilentMode, Mode=OneWay}" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind p:Strings.WaitBeforeAuto}" Description="{x:Bind p:Strings.WaitHelp}">
+                    <ComboBox ItemsSource="{x:Bind Settings.WaitChoices}" SelectedIndex="{x:Bind Settings.WaitIndex, Mode=TwoWay}" MinWidth="90" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind p:Strings.SecurityFirst}" Description="{x:Bind p:Strings.SecurityFirstHelp}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.SecurityFirst, Mode=TwoWay}" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind p:Strings.InstallWindow}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.InstallWindowEnabled, Mode=TwoWay}" />
+                </controls:SettingCard>
+                <!-- Its hours, while it's on. -->
+                <Border Style="{StaticResource Card}" Padding="14,10" Visibility="{x:Bind Settings.InstallWindowEnabled, Mode=OneWay}">
+                    <StackPanel Spacing="6">
+                        <!-- "to" goes under "From" when both don't fit. -->
+                        <controls:FitOrStack Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{x:Bind p:Strings.InstallWindowFrom}" VerticalAlignment="Center" />
+                                <ComboBox ItemsSource="{x:Bind Settings.WindowFromChoices, Mode=OneWay}" SelectedIndex="{x:Bind Settings.WindowFromIndex, Mode=TwoWay}" MinWidth="96"
+                                          AutomationProperties.Name="{x:Bind p:Strings.InstallWindowFromName}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{x:Bind p:Strings.InstallWindowTo}" VerticalAlignment="Center" />
+                                <ComboBox ItemsSource="{x:Bind Settings.WindowToChoices, Mode=OneWay}" SelectedIndex="{x:Bind Settings.WindowToIndex, Mode=TwoWay}" MinWidth="96"
+                                          AutomationProperties.Name="{x:Bind p:Strings.InstallWindowToName}" />
+                            </StackPanel>
+                        </controls:FitOrStack>
+                        <TextBlock Text="{x:Bind p:Strings.InstallWindowHelp}" Style="{StaticResource Secondary}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+                <controls:SettingCard Header="{x:Bind p:Strings.PauseDuringGames}" Description="{x:Bind p:Strings.PauseHelp}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.PauseDuringGames, Mode=TwoWay}" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind p:Strings.SpeedLimit}" Description="{x:Bind Settings.SpeedLimitDescription, Mode=OneWay}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.SpeedLimitEnabled, Mode=TwoWay}" IsEnabled="{x:Bind Settings.CanChangeSpeedLimit, Mode=OneWay}" />
+                </controls:SettingCard>
+                <!-- The limit itself, while it's on. -->
+                <Border Style="{StaticResource Card}" Padding="14,10" Visibility="{x:Bind app:Ui.Visible(Settings.ShowsSpeedLimitBox), Mode=OneWay}">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{x:Bind p:Strings.SpeedLimitBox}" TextWrapping="Wrap" />
+                        <!-- The MB/s goes under the box when it doesn't fit beside it. -->
+                        <controls:FitOrStack Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <NumberBox x:Name="SpeedLimitBox" Value="{x:Bind Settings.SpeedLimitValue, Mode=TwoWay}" SpinButtonPlacementMode="Hidden" ValidationMode="InvalidInputOverwritten"
+                                           MinWidth="110" AutomationProperties.Name="{x:Bind p:Strings.SpeedLimitBox}" />
+                                <TextBlock Text="{x:Bind p:Strings.KBps}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind Settings.SpeedLimitMBps, Mode=OneWay}" Style="{StaticResource Secondary}" VerticalAlignment="Center" />
+                        </controls:FitOrStack>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Text="{x:Bind p:Strings.NotificationsSection}" Style="{StaticResource SectionTitle}" />
+                <controls:SettingCard Header="{x:Bind p:Strings.ShowNotifications}" Description="{x:Bind Settings.NotificationsDescription, Mode=OneWay}">
+                    <ComboBox ItemsSource="{x:Bind Settings.NotificationChoices}" SelectedIndex="{x:Bind Settings.NotificationIndex, Mode=TwoWay}" MinWidth="110" />
+                </controls:SettingCard>
+
+                <TextBlock Text="{x:Bind p:Strings.GeneralSection}" Style="{StaticResource SectionTitle}" />
+                <controls:SettingCard Header="{x:Bind p:Strings.StartWithWindows}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.StartWithWindows, Mode=TwoWay}" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind p:Strings.Shortcut}" Description="{x:Bind Settings.ShortcutNote, Mode=OneWay}">
+                    <Button Content="{x:Bind Settings.ShortcutText, Mode=OneWay}" MinWidth="90"
+                            Click="OnShortcutClick" PreviewKeyDown="OnShortcutKeyDown" PreviewKeyUp="OnShortcutKeyUp" LostFocus="OnShortcutLostFocus" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind p:Strings.ShowWhatsNew}" Description="{x:Bind p:Strings.ShowWhatsNewHelp}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.ShowWhatsNew, Mode=TwoWay}" />
+                </controls:SettingCard>
+                <controls:SettingCard Header="{x:Bind Settings.AutoSelfUpdateText}" Description="{x:Bind Settings.AutoSelfUpdateDescription, Mode=OneWay}">
+                    <ToggleSwitch Style="{StaticResource CardToggle}" IsOn="{x:Bind Settings.AutoSelfUpdate, Mode=TwoWay}" IsEnabled="{x:Bind Settings.AutoSelfUpdateAvailable}" />
+                </controls:SettingCard>
+
+                <TextBlock Text="{x:Bind p:Strings.AboutSection}" Style="{StaticResource SectionTitle}" />
+                <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="14,10" Command="{x:Bind Settings.OpenLogsCommand}"
+                        IsEnabled="{x:Bind Settings.CanOpenLogs, Mode=OneWay}" AutomationProperties.Name="{x:Bind p:Strings.OpenLogs}">
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind p:Strings.OpenLogs}" />
+                            <TextBlock Text="{x:Bind p:Strings.NoLogsYet}" Style="{StaticResource Secondary}" Visibility="{x:Bind app:Ui.Collapsed(Settings.CanOpenLogs), Mode=OneWay}" />
+                        </StackPanel>
+                        <FontIcon HorizontalAlignment="Right" VerticalAlignment="Center" Glyph="&#xE8A7;" FontSize="12" />
+                    </Grid>
+                </Button>
+                <Button x:Name="CopyButton" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="14,10" Command="{x:Bind Settings.CopyDiagnosticsCommand}"
+                        AutomationProperties.Name="{x:Bind p:Strings.CopyDiagnostics}">
+                    <Grid ColumnSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{x:Bind p:Strings.CopyDiagnostics}" />
+                            <TextBlock Text="{x:Bind Settings.CopyText, Mode=OneWay}" Style="{StaticResource Secondary}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <FontIcon Grid.Column="1" VerticalAlignment="Center" Glyph="&#xE8C8;" FontSize="12" />
+                    </Grid>
+                </Button>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid x:Name="Bottom" Grid.Row="2" Style="{StaticResource Footer}">
+            <controls:FitOrStack FirstShare="0.4">
+                <!-- One text, so it wraps at large text sizes. -->
+                <TextBlock Style="{StaticResource Secondary}" TextWrapping="Wrap" VerticalAlignment="Center">
+                    <Run Text="{x:Bind Settings.VersionText}" /><Run Text=" · " /><Hyperlink UnderlineStyle="None" Click="OnGitHub"><Run Text="{x:Bind p:Strings.GitHub}" /></Hyperlink><Run Text=" · " /><Hyperlink UnderlineStyle="None" Click="OnLicense"><Run Text="{x:Bind p:Strings.License}" /></Hyperlink><Run Text=" · " /><Hyperlink UnderlineStyle="None" Click="OnTipPage" ToolTipService.ToolTip="{x:Bind Settings.SupportText}" AutomationProperties.Name="{x:Bind Settings.SupportText}"><Run FontFamily="{ThemeResource SymbolThemeFontFamily}" FontSize="13" Text="&#xEB52;" /></Hyperlink>
+                </TextBlock>
+                <Button HorizontalAlignment="Right" Content="{x:Bind p:Strings.Quit}" Click="OnQuit" />
+            </controls:FitOrStack>
+        </Grid>
+    </Grid>
+</pages:FlyoutPage>

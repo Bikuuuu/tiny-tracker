@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Platforms>x64</Platforms>
+    <!-- The Windows projection on CsWinRT 2.3.1, as the Windows App SDK uses; the .NET SDK's default one warns when trimmed. -->
+    <WindowsSdkPackageVersion>10.0.26100.87</WindowsSdkPackageVersion>
+    <Product>Tiny Tracker</Product>
+    <Company>Tiny Tracker</Company>
+    <Copyright>Copyright (c) 2026 Bikuuuu</Copyright>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+</Project>

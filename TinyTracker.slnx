@@ -1,0 +1,36 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/TinyTracker.App/TinyTracker.App.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/TinyTracker.Core/TinyTracker.Core.csproj" />
+    <Project Path="src/TinyTracker.Helper/TinyTracker.Helper.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/TinyTracker.Presentation/TinyTracker.Presentation.csproj" />
+    <Project Path="src/TinyTracker.WinGet/TinyTracker.WinGet.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TinyTracker.Core.Tests/TinyTracker.Core.Tests.csproj" />
+    <Project Path="tests/TinyTracker.DummyApp/TinyTracker.DummyApp.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="tests/TinyTracker.FakeWinGet/TinyTracker.FakeWinGet.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="tests/TinyTracker.Presentation.Tests/TinyTracker.Presentation.Tests.csproj" />
+    <Project Path="tests/TinyTracker.WinGet.Tests/TinyTracker.WinGet.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/IconGen/IconGen.csproj">
+      <Platform Project="x64" />
+    </Project>
+  </Folder>
+</Solution>

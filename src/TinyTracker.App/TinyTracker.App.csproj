@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.22621.0</TargetPlatformMinVersion>
+    <RootNamespace>TinyTracker.App</RootNamespace>
+    <AssemblyName>TinyTracker</AssemblyName>
+    <!-- Task Manager and Startup apps show this name. -->
+    <AssemblyTitle>Tiny Tracker</AssemblyTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>..\..\assets\icon\generated\app.ico</ApplicationIcon>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <SelfContained>true</SelfContained>
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <!-- The COM source generator writes unsafe code. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- A publish drops the framework and package code nothing uses; the app's own assemblies stay whole (spec §11). -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TinyTracker.Core\TinyTracker.Core.csproj" />
+    <!-- The admin helper lands next to the app's exe. -->
+    <ProjectReference Include="..\TinyTracker.Helper\TinyTracker.Helper.csproj" />
+    <ProjectReference Include="..\TinyTracker.Presentation\TinyTracker.Presentation.csproj" />
+    <ProjectReference Include="..\TinyTracker.WinGet\TinyTracker.WinGet.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\assets\icon\generated\tray.ico" Link="Assets\tray.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\icon\generated\tray-badge.ico" Link="Assets\tray-badge.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\icon\generated\tray-work-*.ico" Link="Assets\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\icon\generated\app-64.png" Link="Assets\app-64.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\icon\hamster-small.svg" Link="Assets\hamster-small.svg" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.Foundation" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.InteractiveExperiences" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.WinUI" />
+  </ItemGroup>
+  <!-- The app is in English only, so WinUI's own translations stay out of the install. -->
+  <Target Name="DropOtherLanguages" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <_OtherLanguage Include="@(ResolvedFileToPublish)" Condition="'%(Extension)' == '.mui' And !$([System.String]::Copy('%(RelativePath)').ToLowerInvariant().StartsWith('en-us'))" />
+      <ResolvedFileToPublish Remove="@(_OtherLanguage)" />
+    </ItemGroup>
+  </Target>
+</Project>

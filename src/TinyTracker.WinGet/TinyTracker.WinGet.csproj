@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <!-- The COM source generator writes unsafe code. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TinyTracker.Core\TinyTracker.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Its build targets copy the COM factory DLL; projects that use this one need them too. -->
+    <PackageReference Include="Microsoft.WindowsPackageManager.ComInterop" PrivateAssets="none" />
+  </ItemGroup>
+</Project>

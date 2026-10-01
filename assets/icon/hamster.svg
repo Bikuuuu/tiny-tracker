@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="fur" cx="50%" cy="58%" r="60%">
+      <stop offset="0" stop-color="#FCCB86"/>
+      <stop offset="0.62" stop-color="#F4A858"/>
+      <stop offset="1" stop-color="#E3903F"/>
+    </radialGradient>
+    <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F7B2CE"/>
+      <stop offset="1" stop-color="#EC8DB4"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6E4A3E"/>
+      <stop offset="1" stop-color="#26170F"/>
+    </linearGradient>
+    <pattern id="knit" width="10" height="8" patternUnits="userSpaceOnUse">
+      <path d="M0 1 L5 6 L10 1" fill="none" stroke="#C9608C" stroke-opacity=".28" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </pattern>
+    <pattern id="rib" width="7" height="10" patternUnits="userSpaceOnUse">
+      <path d="M3.5 0 V10" stroke="#C9608C" stroke-opacity=".3" stroke-width="1.8"/>
+    </pattern>
+    <path id="hoodPath" d="M128 20 C188 20 234 64 236 128 C238 184 212 226 170 240 L86 240 C44 226 18 184 20 128 C22 64 68 20 128 20 Z"/>
+    <path id="bandPath" d="M44 194 C80 214 176 214 212 194 L218 222 C180 244 76 244 38 222 Z"/>
+    <path id="heart" d="M0 25.5 C-6 21 -30 7.5 -30 -9 C-30 -22.5 -13.5 -28.5 0 -15 C13.5 -28.5 30 -22.5 30 -9 C30 7.5 6 21 0 25.5 Z"/>
+  </defs>
+
+  <!-- ears, behind the hood so they poke out of it -->
+  <g stroke="#C97B37" stroke-width="2.5">
+    <g transform="rotate(-18 66 34)">
+      <ellipse cx="66" cy="34" rx="24" ry="30" fill="#EFA257"/>
+      <ellipse cx="67" cy="36" rx="13" ry="18" fill="#F6ABAA" stroke="none"/>
+    </g>
+    <g transform="rotate(18 190 34)">
+      <ellipse cx="190" cy="34" rx="24" ry="30" fill="#EFA257"/>
+      <ellipse cx="189" cy="36" rx="13" ry="18" fill="#F6ABAA" stroke="none"/>
+    </g>
+  </g>
+
+  <!-- knitted hood -->
+  <use xlink:href="#hoodPath" fill="url(#hood)"/>
+  <use xlink:href="#hoodPath" fill="url(#knit)"/>
+  <use xlink:href="#hoodPath" fill="none" stroke="#B9577F" stroke-width="3"/>
+
+  <!-- face -->
+  <ellipse cx="128" cy="140" rx="78" ry="74" fill="url(#fur)"/>
+  <path d="M66 104 Q128 70 190 104 Q128 90 66 104 Z" fill="#DB873A" opacity=".35"/>
+
+  <!-- hood brim framing the face -->
+  <path d="M52.8 166 A80 76 0 1 1 203.2 166" fill="none" stroke="#F7B6CF" stroke-width="14" stroke-linecap="round"/>
+  <path d="M52.8 166 A80 76 0 1 1 203.2 166" fill="none" stroke="#D97AA2" stroke-opacity=".4" stroke-width="10" stroke-dasharray="2.2 5"/>
+  <path d="M58 164.1 A74.5 70.5 0 1 1 198 164.1" fill="none" stroke="#C9608C" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- cheeks, blush, nose, mouth -->
+  <ellipse cx="104" cy="188" rx="24" ry="19" fill="#FFE6C6"/>
+  <ellipse cx="152" cy="188" rx="24" ry="19" fill="#FFE6C6"/>
+  <ellipse cx="128" cy="194" rx="26" ry="17" fill="#FFE6C6"/>
+  <ellipse cx="70" cy="174" rx="11" ry="6.5" fill="#F48FAA" opacity=".5"/>
+  <ellipse cx="186" cy="174" rx="11" ry="6.5" fill="#F48FAA" opacity=".5"/>
+  <path d="M119 172 Q128 166 137 172 Q135 181 128 183 Q121 181 119 172 Z" fill="#EE7F97"/>
+  <ellipse cx="125" cy="171" rx="3" ry="2" fill="#FFD0DA"/>
+  <path d="M128 183 L128 189 M119 193 Q123.5 197 128 191 Q132.5 197 137 193" fill="none" stroke="#9A5B45" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- scarf wrapped under the chin -->
+  <use xlink:href="#bandPath" fill="#F29BBE"/>
+  <use xlink:href="#bandPath" fill="url(#rib)"/>
+  <path d="M44 194 C80 214 176 214 212 194" fill="none" stroke="#C9608C" stroke-opacity=".5" stroke-width="2.5"/>
+  <path d="M47 198 C82 217 174 217 209 198" fill="none" stroke="#F9C6DA" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- heart sunglasses: dark gold under-stroke + light gold wire -->
+  <g fill="none" stroke-linecap="round">
+    <g stroke="#9C7026" stroke-width="7.5">
+      <path d="M116 124 Q128 115 140 124"/><path d="M63 125 L49 120"/><path d="M193 125 L207 120"/>
+    </g>
+    <g stroke="#F2C866" stroke-width="4">
+      <path d="M116 124 Q128 115 140 124"/><path d="M63 125 L49 120"/><path d="M193 125 L207 120"/>
+    </g>
+  </g>
+  <g transform="translate(92 134) rotate(-8)">
+    <use xlink:href="#heart" fill="none" stroke="#9C7026" stroke-width="7.5" stroke-linejoin="round"/>
+    <use xlink:href="#heart" fill="url(#lens)" stroke="#F2C866" stroke-width="4" stroke-linejoin="round"/>
+    <ellipse cx="-14" cy="-9" rx="8.5" ry="4.5" transform="rotate(-35 -14 -9)" fill="#fff" opacity=".6"/>
+    <circle cx="-2" cy="-4" r="2.4" fill="#fff" opacity=".7"/>
+  </g>
+  <g transform="translate(164 134) rotate(8)">
+    <use xlink:href="#heart" fill="none" stroke="#9C7026" stroke-width="7.5" stroke-linejoin="round"/>
+    <use xlink:href="#heart" fill="url(#lens)" stroke="#F2C866" stroke-width="4" stroke-linejoin="round"/>
+    <ellipse cx="-14" cy="-9" rx="8.5" ry="4.5" transform="rotate(-35 -14 -9)" fill="#fff" opacity=".6"/>
+    <circle cx="-2" cy="-4" r="2.4" fill="#fff" opacity=".7"/>
+  </g>
+</svg>

@@ -1,0 +1,71 @@
+<pages:FlyoutPage
+    x:Class="TinyTracker.App.Pages.WhatsNewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:TinyTracker.App.Controls"
+    xmlns:pages="using:TinyTracker.App.Pages"
+    xmlns:p="using:TinyTracker.Presentation"
+    xmlns:updates="using:TinyTracker.Presentation.Updates"
+    NavigationCacheMode="Required">
+    <pages:FlyoutPage.Resources>
+        <!-- The app: its icon, its name, and its versions with the Security pill, as on its row. -->
+        <DataTemplate x:Key="AppHeader" x:DataType="updates:UpdateRow">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <controls:AppIcon Width="32" Height="32" VerticalAlignment="Top" LocalId="{x:Bind LocalId, Mode=OneWay}" AppName="{x:Bind Name, Mode=OneWay}" />
+                <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Bind Name, Mode=OneWay}" Style="{StaticResource BodyStrongTextBlockStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                    <Grid HorizontalAlignment="Left" Visibility="{x:Bind View.ShowVersions, Mode=OneWay}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Style="{StaticResource CaptionTextBlockStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                            <Run Text="{x:Bind View.From, Mode=OneWay}" /><Run Text=" → " /><Run Text="{x:Bind View.To.Unchanged, Mode=OneWay}" /><Run Text="{x:Bind View.To.Changed, Mode=OneWay}"
+                                Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        </TextBlock>
+                        <Border Grid.Column="1" Style="{StaticResource SecurityPill}" Visibility="{x:Bind View.Security, Mode=OneWay}">
+                            <TextBlock Text="{x:Bind p:Strings.Security}" FontSize="11" Foreground="{ThemeResource SecurityPillForeground}" />
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+    </pages:FlyoutPage.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel x:Name="Top" Padding="16,12,16,8" Spacing="10">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Button x:Name="BackButton" Style="{StaticResource IconButton}" Click="OnBack" ToolTipService.ToolTip="{x:Bind p:Strings.Back}" ToolTipService.Placement="Bottom" AutomationProperties.Name="{x:Bind p:Strings.Back}">
+                    <FontIcon Glyph="&#xE72B;" FontSize="14" />
+                </Button>
+                <TextBlock Text="{x:Bind p:Strings.WhatsNew}" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
+            </StackPanel>
+            <ContentControl Content="{x:Bind WhatsNew.Row, Mode=OneWay}" ContentTemplate="{StaticResource AppHeader}" HorizontalContentAlignment="Stretch" IsTabStop="False" />
+        </StackPanel>
+
+        <ScrollViewer x:Name="Scroller" Grid.Row="1">
+            <StackPanel x:Name="Body" Padding="16,0,16,12" Spacing="10">
+                <TextBlock Text="{x:Bind WhatsNew.NoNotes, Mode=OneWay}" Style="{StaticResource Secondary}" TextWrapping="Wrap" Visibility="{x:Bind WhatsNew.HasNoNotes, Mode=OneWay}" />
+                <RichTextBlock x:Name="Notes" TextWrapping="Wrap" IsTextSelectionEnabled="True" />
+                <HyperlinkButton Content="{x:Bind p:Strings.OpenReleasePage}" Command="{x:Bind WhatsNew.OpenLinkCommand}" Padding="0"
+                                 Visibility="{x:Bind WhatsNew.HasLink, Mode=OneWay}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- The row's own button, which does what the row's does. -->
+        <Grid x:Name="Bottom" Grid.Row="2" Style="{StaticResource Footer}" Visibility="{x:Bind WhatsNew.OffersAction, Mode=OneWay}">
+            <Button HorizontalAlignment="Right" Style="{StaticResource AccentButtonStyle}" Content="{x:Bind WhatsNew.Row.View.ActionText, Mode=OneWay, FallbackValue=''}"
+                    Command="{x:Bind WhatsNew.PrimaryCommand}" />
+        </Grid>
+    </Grid>
+</pages:FlyoutPage>

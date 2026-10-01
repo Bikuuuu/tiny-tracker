@@ -1,0 +1,90 @@
+name: Release
+# A vX.Y.Z tag builds, tests and publishes a release (spec §11). A manual run does the same with a given version and
+# keeps Setup.exe with the run for 7 days; it publishes nothing.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: The version to build, such as 1.2.3
+        required: true
+permissions:
+  contents: read
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        env:
+          TAG: ${{ github.ref_name }}
+          INPUT: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then version="${TAG#v}"; else version="$INPUT"; fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::The version must be plain numbers, such as 1.2.3"; exit 1; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+  ci:
+    uses: ./.github/workflows/ci.yml
+  installer:
+    needs: [version, ci]
+    uses: ./.github/workflows/installer.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+  # The only job that may write: a draft with Setup.exe, then published. Immutable releases lock it then.
+  release:
+    needs: [version, installer]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # It waits until the owner approves it in the repository's release environment.
+    environment: release
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: setup
+      - name: Publish
+        run: |
+          setup="TinyTracker-Setup-$VERSION-x64.exe"
+          # The same file under a fixed name too, so releases/latest/download/TinyTracker-Setup-x64.exe always gets the newest.
+          cp "$setup" TinyTracker-Setup-x64.exe
+          gh release create "v$VERSION" "$setup" TinyTracker-Setup-x64.exe --repo "$GITHUB_REPOSITORY" --draft --verify-tag --title "Tiny Tracker $VERSION" --generate-notes
+          gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+  # On its own, so a rerun checks again without publishing again.
+  verify:
+    needs: [version, release]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      attestations: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: setup
+      - name: Check that it's immutable and its files verify
+        run: |
+          cp "TinyTracker-Setup-$VERSION-x64.exe" TinyTracker-Setup-x64.exe
+          if [ "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/v$VERSION" --jq .immutable)" != true ]; then
+            echo "::error::The release isn't immutable. Turn on immutable releases in the repository's settings."
+            exit 1
+          fi
+          # GitHub's record of the release can take a moment to appear.
+          for try in 1 2 3 4 5 6; do
+            if gh release verify-asset "v$VERSION" "TinyTracker-Setup-$VERSION-x64.exe" --repo "$GITHUB_REPOSITORY" \
+              && gh release verify-asset "v$VERSION" TinyTracker-Setup-x64.exe --repo "$GITHUB_REPOSITORY"; then exit 0; fi
+            sleep 10
+          done
+          echo "::error::The release's files couldn't be verified against GitHub's record of them."
+          exit 1

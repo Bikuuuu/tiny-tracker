@@ -1,0 +1,73 @@
+name: CI
+on:
+  # Branches only: a release tag runs these through Release.
+  push:
+    branches: ['**']
+  pull_request:
+  # Release runs the same checks first.
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2025
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - run: dotnet restore TinyTracker.slnx
+      - run: dotnet build TinyTracker.slnx -c Release --no-restore
+      - run: dotnet test TinyTracker.slnx -c Release --no-build
+        # With the read-only check of GitHub's latest release; the token only raises the API's limit.
+        env:
+          TINYTRACKER_GITHUB_LIVE: '1'
+          GH_TOKEN: ${{ github.token }}
+  winget:
+    runs-on: windows-2025
+    timeout-minutes: 30
+    env:
+      TINYTRACKER_WINGET_REQUIRED: '1'
+      TINYTRACKER_WINGET_UPGRADE_TESTS: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Update winget
+        shell: pwsh
+        # Authenticated, so the runner's shared API limit can't fail it.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Install-Module Microsoft.WinGet.Client -RequiredVersion 1.29.380 -Force -Scope CurrentUser -Repository PSGallery
+          Repair-WinGetPackageManager -Version 1.29.380 -Force
+          winget --version
+      - name: Install old test packages
+        shell: pwsh
+        run: |
+          ./scripts/install-old-package.ps1 -Id 'Notepad++.Notepad++' -Version '8.9.7'
+          ./scripts/install-old-package.ps1 -Id 'VideoLAN.VLC' -Version '3.0.20'
+      - name: winget tests
+        run: dotnet test --project tests/TinyTracker.WinGet.Tests -c Release --fail-skips on --output Detailed -- --filter-not-class "*ElevatedHelperTests" --filter-not-class "*SpeedLimitRunnerTests" --filter-not-class "*SelfUpdateRunnerTests" --filter-not-class "*GitHubLiveTests"
+      # The COM upgrade test left Notepad++ updated; the helper's own upgrade test needs the old one again.
+      - name: Install the old Notepad++ again
+        shell: pwsh
+        run: |
+          winget uninstall --id Notepad++.Notepad++ --exact --silent --disable-interactivity
+          ./scripts/install-old-package.ps1 -Id 'Notepad++.Notepad++' -Version '8.9.7'
+      - name: Elevated helper tests
+        run: dotnet test --project tests/TinyTracker.WinGet.Tests -c Release --no-build --fail-skips on --output Detailed -- --filter-class "*ElevatedHelperTests"
+      # And once more for the speed limit, whose tests turn winget's proxy option on.
+      - name: Install the old Notepad++ once more
+        shell: pwsh
+        run: |
+          winget uninstall --id Notepad++.Notepad++ --exact --silent --disable-interactivity
+          ./scripts/install-old-package.ps1 -Id 'Notepad++.Notepad++' -Version '8.9.7'
+      - name: Speed limit tests
+        run: dotnet test --project tests/TinyTracker.WinGet.Tests -c Release --no-build --fail-skips on --output Detailed -- --filter-class "*SpeedLimitRunnerTests"
+  # The install test, on pull requests to main; Release runs it itself.
+  install:
+    if: github.event_name == 'pull_request' && github.base_ref == 'main'
+    uses: ./.github/workflows/installer.yml
